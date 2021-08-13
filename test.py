@@ -1,4 +1,4 @@
-#from scapy.all import *
+from scapy.all import *
 import random
 
 eapol_1 = b'\x00\x00\x1a\x00/H\x00\x00\xeb\xad\x91\xaa\x00\x00\x00\x00\x10\x02\x8f\t\xa0\x00\xb4\x00\x00\x00\x88\x02:\x01\xf0\x8av\xfd\x12B\xbc\x96\x80\xb4aQ\xbc\x96\x80\xb4aQ\x00\x00\x00\x00\xaa\xaa\x03\x00\x00\x00\x88\x8e\x01\x03\x00_\xfe\x00\x8a\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\xacW\xc4Z\xb6\xa9\xc0{\x0e\x03\xbb!8\xd76\x89\x07#\x860\xcb\xaa\x83\xcf\x87\x12r=\x7f\x9a\xe3_\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00^\xdca3'
@@ -23,6 +23,7 @@ def random_nonce():
 	for i in range(1,33):
 		rand_byte = format(random.randint(0,16*16),x)
 
+
 def pkttobyte(pkt):
 	result_pkt = ''
 
@@ -42,6 +43,7 @@ def pkttobyte(pkt):
 		
 	return result_pkt
 
+
 def gen_key(n):
     result = ''
     for i in range(0,n):
@@ -51,27 +53,46 @@ def gen_key(n):
             random_key = '0'+ random_key
         result = result + '=' + random_key
     return random_key
+
+
+def modify_mac(pkt):
+    pkt = RadioTap(pkt)
+    
+    pkt[Dot11].addr1 = gateway_mac
+    pkt[Dot11].addr2 = gateway_mac
+    pkt[Dot11].addr3 = target_mac
+
+    return str(pkt)
         
 
 def modify_handshaking():
-	#pkt[Dot11].addr1 = gateway_mac
-	#pkt[Dot11].addr2 = gateway_mac
-	#pkt[Dot11].addr3 = target_mac
+    #pkt[Dot11].addr1 = gateway_mac
+    #pkt[Dot11].addr2 = gateway_mac
+    #pkt[Dot11].addr3 = target_mac
     
-        random_key_1 = gen_key(32)
-        random_key_2 = gen_key(32)
+    random_key_1 = gen_key(32)
+    random_key_2 = gen_key(32)
 
-        random_mic_1 = gen_key(16)
-        
-        pkt_1 = pkttobyte(eapol_1)
-        pkt_1 = pkt_1.replace(eapol_key_1,random_key_1)
-        print(pkt_1)
-        print('=============')
+    random_mic_1 = gen_key(16)
 
-        pkt_2 = pkttobyte(eapol_2)
-        pkt_2 = pkt_2.replace(eapol_key_2,random_key_1)
-        print(pkt_2)
+    pkt_1 = modify_mac(eapol_1)
+    pkt_1 = pkttobyte(pkt_1)
+    pkt_1 = pkt_1.replace(eapol_key_1,random_key_1)
+    print(pkt_1)
+    print('=============')
+
+    pkt_2 = modify_mac(eapol_2)
+    pkt_2 = pkttobyte(pkt_2)
+    pkt_2 = pkt_2.replace(eapol_key_2,random_key_1)
+    print(pkt_2)
+    print('=============')
+
+    pkt_3 = modify_mac(eapol_3)
+    pkt_3 = pkttobyte(pkt_3)
+    pkt_3 = pkt_3.replace(eapol_key_1,random_key_1)
+    print(pkt_3)
         
-#	sendp(pkt, monitor=True)
+#   sendp(pkt, monitor=True)
 
 modify_handshaking()
+
