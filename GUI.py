@@ -17,7 +17,7 @@ class Ui_Form(object):
         self.background = QtWidgets.QLabel(self.centralwidget)
         self.background.setGeometry(QtCore.QRect(0, 0, 1280, 720))
         self.background.setText("")
-        self.background.setPixmap(QtGui.QPixmap("GUI\\GUI.jpg"))
+        self.background.setPixmap(QtGui.QPixmap("GUI/GUI.jpg"))
         self.background.setObjectName("background")
         self.button_minimize = QtWidgets.QPushButton(self.centralwidget)
         self.button_minimize.setGeometry(QtCore.QRect(1179, 0, 51, 51))
@@ -26,7 +26,7 @@ class Ui_Form(object):
         self.button_minimize.setObjectName("button_minimize")
         self.button_exit = QtWidgets.QPushButton(self.centralwidget)
         self.button_exit.setGeometry(QtCore.QRect(1229, 0, 51, 51))
-        self.button_exit.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+        self.button_exit.setStyleSheet("background-color: rgba(255, 255, 255, 10);")
         self.button_exit.setText("")
         self.button_exit.setObjectName("button_exit")
         self.console = QtWidgets.QLineEdit(self.centralwidget)
@@ -55,7 +55,7 @@ class Ui_Form(object):
         self.button_monitor.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
         self.button_monitor.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("GUI\\off.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("GUI/off.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.button_monitor.setIcon(icon)
         self.button_monitor.setIconSize(QtCore.QSize(40, 20))
         self.button_monitor.setCheckable(False)
@@ -75,7 +75,7 @@ class Ui_Form(object):
         self.button_WS.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
         self.button_WS.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("GUI\\off_blue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("GUI/off_blue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.button_WS.setIcon(icon1)
         self.button_WS.setIconSize(QtCore.QSize(40, 20))
         self.button_WS.setCheckable(False)
@@ -86,7 +86,7 @@ class Ui_Form(object):
         self.button_CW.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
         self.button_CW.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("GUI\\off_green.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("GUI/off_green.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.button_CW.setIcon(icon2)
         self.button_CW.setIconSize(QtCore.QSize(40, 20))
         self.button_CW.setCheckable(False)
@@ -97,7 +97,7 @@ class Ui_Form(object):
         self.button_BF.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
         self.button_BF.setText("")
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("GUI\\off_orange.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3.addPixmap(QtGui.QPixmap("GUI/off_orange.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.button_BF.setIcon(icon3)
         self.button_BF.setIconSize(QtCore.QSize(40, 20))
         self.button_BF.setCheckable(False)
@@ -140,19 +140,21 @@ class MyWindow(QtWidgets.QMainWindow, Ui_Form):
         self.button_minimize.clicked.connect(self.minimize)
         self.button_exit.clicked.connect(self.exit)
 
+
         self.button_minimize.setStyleSheet(
             '''
-            QPushButton{background-color: rgba(39, 39, 39, 0);}
+            QPushButton{background-color: rgba(255,255,255,0);border: 0px;}
             QPushButton:hover{background-color: rgba(39, 39, 39, 100);}
             '''
         )
 
         self.button_exit.setStyleSheet(
             '''
-            QPushButton{background-color: rgba(39, 39, 39, 0);}
+            QPushButton{background-color: rgba(255,255,255,0);border: 0px;}
             QPushButton:hover{background-color: rgba(39, 39, 39, 100);}
             '''
         )
+
 
     def minimize(self):
         self.showMinimized()
