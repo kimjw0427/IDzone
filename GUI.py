@@ -2,6 +2,8 @@
 
 # python -m PyQt5.uic.pyuic -x [FILENAME].ui -o [FILENAME].py
 
+from Module import iface
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -26,30 +28,9 @@ class Ui_Form(object):
 		self.button_minimize.setObjectName("button_minimize")
 		self.button_exit = QtWidgets.QPushButton(self.centralwidget)
 		self.button_exit.setGeometry(QtCore.QRect(1229, 0, 51, 51))
-		self.button_exit.setStyleSheet("background-color: rgba(255, 255, 255, 10);")
+		self.button_exit.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
 		self.button_exit.setText("")
 		self.button_exit.setObjectName("button_exit")
-		self.console = QtWidgets.QLineEdit(self.centralwidget)
-		self.console.setGeometry(QtCore.QRect(860, 75, 380, 610))
-		self.console.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
-		self.console.setFrame(False)
-		self.console.setReadOnly(True)
-		self.console.setObjectName("console")
-		self.line_monitor = QtWidgets.QLineEdit(self.centralwidget)
-		self.line_monitor.setGeometry(QtCore.QRect(40, 120, 200, 30))
-		self.line_monitor.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
-		self.line_monitor.setFrame(False)
-		self.line_monitor.setObjectName("line_monitor")
-		self.line_adaptor = QtWidgets.QLineEdit(self.centralwidget)
-		self.line_adaptor.setGeometry(QtCore.QRect(40, 300, 200, 30))
-		self.line_adaptor.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
-		self.line_adaptor.setFrame(False)
-		self.line_adaptor.setObjectName("line_adaptor")
-		self.line_password = QtWidgets.QLineEdit(self.centralwidget)
-		self.line_password.setGeometry(QtCore.QRect(40, 370, 200, 30))
-		self.line_password.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
-		self.line_password.setFrame(False)
-		self.line_password.setObjectName("line_password")
 		self.button_monitor = QtWidgets.QPushButton(self.centralwidget)
 		self.button_monitor.setGeometry(QtCore.QRect(40, 160, 40, 20))
 		self.button_monitor.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
@@ -112,15 +93,35 @@ class Ui_Form(object):
 		self.button_anti_jamming.setCheckable(False)
 		self.button_anti_jamming.setChecked(False)
 		self.button_anti_jamming.setObjectName("button_anti_jamming")
-		self.line_eapol = QtWidgets.QLineEdit(self.centralwidget)
-		self.line_eapol.setGeometry(QtCore.QRect(450, 150, 40, 20))
+		self.console = QtWidgets.QTextEdit(self.centralwidget)
+		self.console.setGeometry(QtCore.QRect(860, 80, 380, 600))
+		self.console.setStyleSheet("background-color: rgba(255, 255, 255, 0);\n"
+"color: rgb(255, 255, 255);")
+		self.console.setObjectName("console")
+		self.line_monitor = QtWidgets.QTextEdit(self.centralwidget)
+		self.line_monitor.setGeometry(QtCore.QRect(40, 120, 200, 30))
+		self.line_monitor.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+		self.line_monitor.setFrameShape(QtWidgets.QFrame.NoFrame)
+		self.line_monitor.setObjectName("line_monitor")
+		self.line_adaptor = QtWidgets.QTextEdit(self.centralwidget)
+		self.line_adaptor.setGeometry(QtCore.QRect(40, 300, 200, 30))
+		self.line_adaptor.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+		self.line_adaptor.setFrameShape(QtWidgets.QFrame.NoFrame)
+		self.line_adaptor.setObjectName("line_adaptor")
+		self.line_password = QtWidgets.QTextEdit(self.centralwidget)
+		self.line_password.setGeometry(QtCore.QRect(40, 370, 200, 30))
+		self.line_password.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+		self.line_password.setFrameShape(QtWidgets.QFrame.NoFrame)
+		self.line_password.setObjectName("line_password")
+		self.line_eapol = QtWidgets.QTextEdit(self.centralwidget)
+		self.line_eapol.setGeometry(QtCore.QRect(450, 150, 41, 21))
 		self.line_eapol.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
-		self.line_eapol.setFrame(False)
+		self.line_eapol.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.line_eapol.setObjectName("line_eapol")
-		self.line_thread = QtWidgets.QLineEdit(self.centralwidget)
-		self.line_thread.setGeometry(QtCore.QRect(450, 180, 40, 20))
+		self.line_thread = QtWidgets.QTextEdit(self.centralwidget)
+		self.line_thread.setGeometry(QtCore.QRect(450, 180, 41, 21))
 		self.line_thread.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
-		self.line_thread.setFrame(False)
+		self.line_thread.setFrameShape(QtWidgets.QFrame.NoFrame)
 		self.line_thread.setObjectName("line_thread")
 		MainWindow.setCentralWidget(self.centralwidget)
 
@@ -130,6 +131,15 @@ class Ui_Form(object):
 	def retranslateUi(self, MainWindow):
 		_translate = QtCore.QCoreApplication.translate
 		MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+		self.console.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Gulim\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+
+
+
+status_monitor = False
 
 
 class MyWindow(QtWidgets.QMainWindow, Ui_Form):
@@ -139,6 +149,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_Form):
 
 		self.button_minimize.clicked.connect(self.minimize)
 		self.button_exit.clicked.connect(self.exit)
+
+		self.button_monitor.clicked.connect(self.on_monitor)
 
 		self.button_minimize.setStyleSheet(
 			'''
@@ -153,6 +165,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_Form):
 			QPushButton:hover{background-color: rgba(39, 39, 39, 100);}
 			'''
 		)
+	
+		self.line_monitor.setText(iface.default_if())
+
+		if iface.check_monitor(self.line_monitor.toPlainText()):
+			self.on_monitor()
 
 
 	def minimize(self):
@@ -160,6 +177,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_Form):
 
 	def exit(self):
 		sys.exit(app.exec_())
+
 
 
 	def center(self):
@@ -175,6 +193,26 @@ class MyWindow(QtWidgets.QMainWindow, Ui_Form):
 		delta = QtCore.QPoint(event.globalPos() - self.oldPos)
 		self.move(self.x() + delta.x(), self.y() + delta.y())
 		self.oldPos = event.globalPos()
+
+	def on_monitor(self):
+		global status_monitor
+		if status_monitor == True:
+			status_monitor = False
+			icon = QtGui.QIcon()
+			icon.addPixmap(QtGui.QPixmap("GUI/off.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+			self.button_monitor.setIcon(icon)
+			adapter_name = self.line_monitor.toPlainText()
+			self.console.append(f'[IDzone] Wireless Adapter {adapter_name} is set to Managed Mode')
+		else:
+			status_monitor = True
+			icon = QtGui.QIcon()
+			icon.addPixmap(QtGui.QPixmap("GUI/on.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+			self.button_monitor.setIcon(icon)
+			adapter_name = self.line_monitor.toPlainText()
+			self.console.append(f'[IDzone] Wireless Adapter {adapter_name} is set to Monitor Mode')
+			
+		
+	
 
 
 if __name__ == "__main__":
